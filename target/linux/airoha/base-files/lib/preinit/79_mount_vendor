@@ -1,0 +1,23 @@
+airoha_mount_vendor_partition() {
+	case "$(board_name)" in
+	vsol,v2901q-a | vsol,v2902a-s)
+		local mtd_num ubi_dev
+
+		mtd_num=$(find_mtd_index "rootfs_data")
+
+		if [ -n "$mtd_num" ] && [ "$(cat /sys/class/ubi/ubi0/mtd_num)" = "$mtd_num" ]; then
+			if ! ubinfo "/dev/ubi0" -N "rootfs_data" >/dev/null 2>&1; then
+				if ubimkvol "/dev/ubi0" -N "rootfs_data" -m; then
+					ubi_dev=$(cat "/sys/class/ubi/ubi0_0/dev")
+					mknod "/dev/ubi0_0" c "${ubi_dev%%:*}" "${ubi_dev##*:}"
+				fi
+			fi
+		fi
+		;;
+	*)
+		return 0
+		;;
+	esac
+}
+
+boot_hook_add preinit_main airoha_mount_vendor_partition

@@ -1,0 +1,216 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+/dts-v1/;
+
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include "an7583.dtsi"
+
+/ {
+	aliases {
+		serial0 = &uart1;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200 earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x20000000>;
+	};
+
+	gpio-keys-polled {
+		compatible = "gpio-keys-polled";
+		poll-interval = <100>;
+
+		btn-reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&an7583_pinctrl 0 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-system {
+			label = "system";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_POWER;
+			gpios = <&an7583_pinctrl 7 GPIO_ACTIVE_LOW>;
+		};
+
+		led-pon {
+			label = "pon";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&an7583_pinctrl 12 GPIO_ACTIVE_LOW>;
+		};
+
+		led-internet {
+			label = "internet";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_WAN;
+			gpios = <&an7583_pinctrl 26 GPIO_ACTIVE_LOW>;
+		};
+
+		led-los {
+			label = "los";
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&an7583_pinctrl 27 GPIO_ACTIVE_LOW>;
+		};
+
+		led-sfp {
+			label = "sfp";
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_LAN;
+			gpios = <&an7583_pinctrl 29 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+&an7583_pinctrl {
+	gpio-ranges = <&an7583_pinctrl 0 2 53>;
+
+	mdio0_pins: mdio0-pins {
+		conf {
+			pins = "mdio_0";
+			output-high;
+		};
+	};
+
+	pcie0_rst_pins: pcie0-rst-pins {
+		conf {
+			pins = "pcie_reset0";
+			drive-open-drain = <1>;
+		};
+	};
+
+	pcie1_rst_pins: pcie1-rst-pins {
+		conf {
+			pins = "pcie_reset1";
+			drive-open-drain = <1>;
+		};
+	};
+
+	gswp1_led0_pins: gswp1-led0-pins {
+		mux {
+			function = "phy1_led0";
+			pins = "gpio1";
+		};
+	};
+};
+
+&snfi {
+	status = "okay";
+};
+
+&spi_nand {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		bootloader@0 {
+			label = "bootloader";
+			reg = <0x00000000 0x00080000>;
+		};
+
+		tclinux@80000 {
+			compatible = "denx,fit";
+			label = "tclinux";
+			reg = <0x00080000 0x02000000>;
+			openwrt,cmdline-match = "boot_part=0";
+		};
+
+		tclinux_slave@2080000 {
+			compatible = "denx,fit";
+			label = "tclinux_slave";
+			reg = <0x02080000 0x02000000>;
+			openwrt,cmdline-match = "boot_part=1";
+		};
+
+		rootfs_data@4080000 {
+			compatible = "linux,ubi";
+			label = "rootfs_data";
+			reg = <0x04080000 0x02800000>;
+		};
+
+		factory@6880000 {
+			label = "factory";
+			reg = <0x06880000 0x00100000>;
+		};
+
+		art@6c80000 {
+			label = "art";
+			reg = <0x06c80000 0x00380000>;
+		};
+	};
+};
+
+&i2c0 {
+	status = "okay";
+};
+
+&i2c1 {
+	status = "okay";
+};
+
+&npu {
+	status = "okay";
+};
+
+&eth {
+	status = "okay";
+};
+
+&gdm1 {
+	status = "okay";
+};
+
+&gdm3 {
+	status = "okay";
+};
+
+&switch {
+	status = "okay";
+};
+
+&gsw_phy1 {
+	status = "okay";
+	pinctrl-names = "gbe-led";
+	pinctrl-0 = <&gswp1_led0_pins>;
+};
+
+&gsw_phy1_led0 {
+	status = "okay";
+	color = <LED_COLOR_ID_GREEN>;
+	active-low;
+};
+
+&gsw_port2 {
+	status = "disabled";
+};
+
+&gsw_port3 {
+	status = "disabled";
+};
+
+&gsw_port4 {
+	status = "disabled";
+};
+
+&gsw_phy2 {
+	status = "disabled";
+};
+
+&gsw_phy3 {
+	status = "disabled";
+};
+
+&gsw_phy4 {
+	status = "disabled";
+};

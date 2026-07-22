@@ -64,6 +64,16 @@ define U-Boot/an7583_rfb
   BL31_IMAGE:=an7583-bl31.bin
 endef
 
+define U-Boot/an7583_vsol
+  NAME:=VSOL V2901Q-A / V2902A-S
+  UBOOT_CONFIG:=an7583_vsol
+  BUILD_DEVICES:=vsol_an7583
+  BUILD_SUBTARGET:=an7583
+  UBOOT_IMAGE:=u-boot.fip
+  BL2_IMAGE:=an7583-bl2.bin
+  BL31_IMAGE:=an7583-bl31.bin
+endef
+
 define U-Boot/en7523_rfb
   NAME:=EN7523 Reference Board
   UBOOT_CONFIG:=en7523_evb
@@ -80,7 +90,8 @@ UBOOT_TARGETS := \
 	an7581_nokia_xg-040g-md \
 	an7581_rfb \
 	an7583_rfb \
-	en7523_rfb
+	en7523_rfb \
+	an7583_vsol
 
 UBOOT_CUSTOMIZE_CONFIG := \
 	--disable TOOLS_KWBIMAGE \
